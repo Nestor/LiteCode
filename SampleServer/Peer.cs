@@ -41,7 +41,7 @@ namespace SampleServer
             if (OPSocket as LiteCodeClient != null)
             {
                 LiteCodeClient liteClient = OPSocket as LiteCodeClient;
-                liteClient.ShareClass("SharedTest", typeof(SharedTest));
+                liteClient.ShareClass("SharedTest", typeof(SharedTest), false, int.MaxValue); //int.MaxValue = BAD, use 5-10 instead
             }
         }
 

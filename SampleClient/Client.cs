@@ -4,6 +4,7 @@ using SecureSocketProtocol3;
 using SecureSocketProtocol3.Network;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -27,15 +28,30 @@ namespace SampleClient
             liteCode.Connect();
 
             ISharedTest SharedTest = liteCode.GetSharedClass<ISharedTest>("SharedTest");
-            byte[] ret_Array = SharedTest.ByteArrayTest();
 
             SharedTest.CallTest();
-            //SharedTest.DelegateTest(new DelegateTestCallback(CallbackDelegate));
+            SharedTest.CallTest(1234);
+            SharedTest.CallTest("test");
+            SharedTest.CallTest(ulong.MaxValue);
 
+            //Console.WriteLine("ByteArrayTest");
+            //byte[] ret_Array = SharedTest.ByteArrayTest();
+
+            //Console.WriteLine("CallTest");
+            //SharedTest.CallTest();
+            SharedTest.DelegateTest(new DelegateTestCallback(CallbackDelegate));
+
+            Console.WriteLine("IntegerTest");
             int ret_Int = SharedTest.IntegerTest();
+
+            Console.WriteLine("SecretShit");
             SharedTest.SecretShit();
-            SharedTest.SendByteArray(ASCIIEncoding.ASCII.GetBytes("Some Data..."));
-            string ret_String = SharedTest.StringTest();
+
+            //Console.WriteLine("SendByteArray");
+            //SharedTest.SendByteArray(ASCIIEncoding.ASCII.GetBytes("Some Data..."));
+
+            //Console.WriteLine("StringTest");
+            //string ret_String = SharedTest.StringTest();
         }
 
         private void CallbackDelegate(string Value)
@@ -147,6 +163,21 @@ namespace SampleClient
             public override CompressionAlgorithm CompressionAlgorithm
             {
                 get { return SecureSocketProtocol3.CompressionAlgorithm.QuickLZ; }
+            }
+
+            public override System.Drawing.Size Handshake_Maze_Size
+            {
+                get { return new System.Drawing.Size(128, 128); }
+            }
+
+            public override ushort Handshake_StepSize
+            {
+                get { return 10; }
+            }
+
+            public override ushort Handshake_MazeCount
+            {
+                get { return 3; }
             }
         }
     }

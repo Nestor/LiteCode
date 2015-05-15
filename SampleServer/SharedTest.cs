@@ -21,6 +21,24 @@ namespace SampleServer
         }
 
         [RemoteExecution(30000, null)]
+        public void CallTest(int test)
+        {
+            Console.WriteLine("CallTest() " + test);
+        }
+
+        [RemoteExecution(30000, null)]
+        public void CallTest(string test)
+        {
+            Console.WriteLine("CallTest() " + test);
+        }
+
+        [RemoteExecution(30000, null)]
+        public void CallTest(object test)
+        {
+            Console.WriteLine("CallTest() " + test);
+        }
+
+        [RemoteExecution(30000, null)]
         public string StringTest()
         {
             return "test";
@@ -44,7 +62,7 @@ namespace SampleServer
 
         }
 
-        [RemoteExecution(30000, null)]
+        [UncheckedRemoteExecution()]
         public void DelegateTest(DelegateTestCallback Delly)
         {
             Delly("HelloWorld from Server :)");
@@ -55,5 +73,6 @@ namespace SampleServer
         {
             Console.WriteLine("SendByteArray, Length: " + data.Length);
         }
+
     }
 }

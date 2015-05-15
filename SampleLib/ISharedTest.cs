@@ -10,6 +10,10 @@ namespace SampleLib
     public interface ISharedTest
     {
         void CallTest();
+        void CallTest(int test);
+        void CallTest(string test);
+        void CallTest(object test);
+
         string StringTest();
         int IntegerTest();
         byte[] ByteArrayTest();

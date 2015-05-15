@@ -8,9 +8,10 @@ using System.Text;
 namespace LiteCode.Shared
 {
     [Serializable]
-    public class SharedClass
+    public class SharedClass : IDisposable
     {
         internal SortedList<string, List<SharedMethod>> _Methods;
+
         [NonSerialized]
         internal LiteCodeClient Client;
         [NonSerialized]
@@ -30,7 +31,21 @@ namespace LiteCode.Shared
         internal int SharedId { get; set; }
         public List<Type[]> ConstructorTypes { get; private set; }
         public bool RemoteInitialize { get; private set; }
-        public SharedMethod[] Methods { get; private set; }
+
+        public SharedMethod[] Methods
+        {
+            get
+            {
+                List<SharedMethod> methods = new List<SharedMethod>();
+
+                for (int i = 0; i < _Methods.Count; i++)
+                {
+                    methods.AddRange(_Methods.Values[i]);
+                }
+
+                return methods.ToArray();
+            }
+        }
 
         public bool IsDisposed { get; internal set; }
 
@@ -61,7 +76,6 @@ namespace LiteCode.Shared
             this.RemoteInitialize = RemoteInitialize;
             this.MaxInitializations = MaxInitializations;
 
-            List<SharedMethod> methods = new List<SharedMethod>();
             foreach (MethodInfo m in ClassType.GetMethods())
             {
                 if (!m.IsPublic || m.GetCustomAttributes(typeof(RemoteExecutionAttribute), false).Length == 0
@@ -75,11 +89,17 @@ namespace LiteCode.Shared
                 if (!_Methods.ContainsKey(m.Name))
                     _Methods.Add(m.Name, new List<SharedMethod>());
                 _Methods[m.Name].Add(sharedMethod);
-
-                methods.Add(sharedMethod);
-                sharedMethod.MethodId = methods.Count;
             }
-            this.Methods = methods.ToArray();
+
+            //set Method Id
+            int methodId = 0;
+            for (int i = 0; i < _Methods.Count; i++)
+            {
+                for (int j = 0; j < _Methods.Values[i].Count; j++)
+                {
+                    _Methods.Values[i][j].MethodId = ++methodId;
+                }
+            }
 
             foreach (ConstructorInfo m in ClassType.GetConstructors())
             {
@@ -91,13 +111,6 @@ namespace LiteCode.Shared
                     ConstructorTypes.Add(list.ToArray());
                 }
             }
-        }
-
-        ~SharedClass()
-        {
-            InitializedClass = null;
-            SharedId = 0;
-            _Methods = null;
         }
 
         public SharedMethod GetMethod(int methodId)
@@ -167,6 +180,13 @@ namespace LiteCode.Shared
                 return null;
             }
             throw new Exception("Method not found");
+        }
+
+        public void Dispose()
+        {
+            InitializedClass = null;
+            SharedId = 0;
+            _Methods = null;
         }
     }
 }

@@ -10,7 +10,7 @@ using System.Text;
 namespace LiteCode.Shared
 {
     [Serializable]
-    public class SharedMethod
+    public class SharedMethod : IDisposable
     {
         public string Name { get; internal set; }
         public Type[] ArgumentTypes { get; internal set; }
@@ -78,14 +78,6 @@ namespace LiteCode.Shared
             this.DelegateId = DelegateId;
         }
 
-        ~SharedMethod()
-        {
-            Name = null;
-            ArgumentTypes = null;
-            ReturnType = null;
-            sharedClass = null;
-        }
-
         private void InvokeTask(object[] args)
         {
             object obj = null;
@@ -99,15 +91,6 @@ namespace LiteCode.Shared
 
             List<int> usedDelegates = new List<int>();
             PayloadWriter pw = new PayloadWriter();
-            pw.WriteInteger(sharedClass.SharedId);
-            pw.WriteInteger(MethodId);
-            pw.WriteByte(isDelegate ? (byte)1 : (byte)0);
-
-            if (isDelegate)
-            {
-                pw.WriteInteger(this.DelegateId);
-                pw.WriteInteger(this.sharedClass.SharedId);
-            }
 
             SmartSerializer serializer = new SmartSerializer();
             for (int i = 0; i < args.Length; i++)
@@ -154,7 +137,7 @@ namespace LiteCode.Shared
             if (Unchecked || useUdp)
             {
                 //just execute the method and don't wait for response
-                sharedClass.Client.Send(new MsgExecuteMethod(0, pw.ToByteArray(), false));
+                sharedClass.Client.Send(new MsgExecuteMethod(0, pw.ToByteArray(), false, sharedClass.SharedId, MethodId, this.DelegateId, this.sharedClass.SharedId));
             }
             else
             {
@@ -167,7 +150,7 @@ namespace LiteCode.Shared
                         RequestId = rnd.Next();
                     syncObject = new SyncObject(sharedClass.Client);
                     sharedClass.Client.Requests.Add(RequestId, syncObject);
-                    sharedClass.Client.Send(new MsgExecuteMethod(RequestId, pw.ToByteArray(), true));
+                    sharedClass.Client.Send(new MsgExecuteMethod(RequestId, pw.ToByteArray(), true, sharedClass.SharedId, MethodId, this.DelegateId, this.sharedClass.SharedId));
                 }
                 RetObject = syncObject.Wait<ReturnResult>(null, TimeOutLength);
 
@@ -218,6 +201,14 @@ namespace LiteCode.Shared
             }
             str += ")";
             return str;
+        }
+
+        public void Dispose()
+        {
+            Name = null;
+            ArgumentTypes = null;
+            ReturnType = null;
+            sharedClass = null;
         }
     }
 }

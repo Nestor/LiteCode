@@ -28,6 +28,20 @@ namespace LiteCode.Messages
         [ProtoMember(4)]
         public bool RequireResultBack { get; set; }
 
+        [ProtoMember(5)]
+        public int SharedClassId { get; set; }
+
+        [ProtoMember(6)]
+        public int MethodId { get; set; }
+
+        [ProtoMember(7)]
+        public int DelegateId { get; set; }
+
+        [ProtoMember(8)]
+        public int DelegateClassId { get; set; }
+
+        bool isDelegate { get { return DelegateId > 0; } }
+
         public ReturnResult Result
         {
             get { return new ReturnResult().Deserialize(ResultData); }
@@ -39,12 +53,17 @@ namespace LiteCode.Messages
         {
 
         }
-        public MsgExecuteMethod(int RequestId, byte[] Data, bool RequireResultBack)
+        public MsgExecuteMethod(int RequestId, byte[] Data, bool RequireResultBack,
+                                int SharedClassId, int MethodId, int DelegateId, int DelegateClassId)
             : base()
         {
             this.RequestId = RequestId;
             this.Data = Data;
             this.RequireResultBack = RequireResultBack;
+            this.SharedClassId = SharedClassId;
+            this.MethodId = MethodId;
+            this.DelegateId = DelegateId;
+            this.DelegateClassId = DelegateClassId;
         }
         public MsgExecuteMethod(int RequestId)
             : base()
@@ -56,23 +75,15 @@ namespace LiteCode.Messages
         public override void ProcessPayload(SSPClient client, OperationalSocket OpSocket)
         {
             ReturnResult result = new ReturnResult(null, false);
-            bool isDelegate = false;
-            bool ReadFullHeader = false;
             LiteCodeClient Client = OpSocket as LiteCodeClient;
 
             try
             {
                 PayloadReader pr = new PayloadReader(Data);
-                int SharedClassId = pr.ReadInteger();
-                int MethodId = pr.ReadInteger();
-                isDelegate = pr.ReadByte() == 1;
-                int DelegateId = isDelegate ? pr.ReadInteger() : 0;
-                int DelegateClassId = isDelegate ? pr.ReadInteger() : 0;
-                ReadFullHeader = true;
+                SharedClass sClass = null;
 
-                if (Client.InitializedClasses.ContainsKey(SharedClassId))
+                if (Client.InitializedClasses.TryGetValue(SharedClassId, out sClass))
                 {
-                    SharedClass sClass = Client.InitializedClasses[SharedClassId];
                     SharedMethod sharedMethod = sClass.GetMethod(MethodId);
 
                     if (sharedMethod != null)
@@ -84,9 +95,10 @@ namespace LiteCode.Messages
 
                         lock (sharedMethod.Delegates)
                         {
-                            if (sharedMethod.Delegates.ContainsKey(DelegateId))
+                            SharedDelegate sharedDel = null;
+                            if (sharedMethod.Delegates.TryGetValue(DelegateId, out sharedDel))
                             {
-                                for (int i = 0; i < sharedMethod.Delegates[DelegateId].sharedMethod.ArgumentTypes.Length; i++)
+                                for (int i = 0; i < sharedDel.sharedMethod.ArgumentTypes.Length; i++)
                                 {
                                     args.Add(serializer.Deserialize(pr.ReadBytes(pr.ReadInteger())));
                                 }
@@ -121,12 +133,6 @@ namespace LiteCode.Messages
                         else
                         {
                             MethodInfo methodInf = sClass.InitializedClass.GetType().GetMethod(sharedMethod.Name, sharedMethod.ArgumentTypes);
-
-                            if (methodInf.GetCustomAttributes(typeof(RemoteExecutionAttribute), false).Length == 0 &&
-                                methodInf.GetCustomAttributes(typeof(UncheckedRemoteExecutionAttribute), false).Length == 0)
-                            {
-                                //return null;
-                            }
                             result.ReturnValue = methodInf.Invoke(sClass.InitializedClass, args.ToArray());
                         }
                     }
@@ -134,9 +140,6 @@ namespace LiteCode.Messages
             }
             catch (Exception ex)
             {
-                //if (isDelegate && ReadFullHeader)
-                //    throw ex;
-
                 result.exceptionMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 result.ExceptionOccured = true;
                 client.onException(ex.InnerException != null ? ex.InnerException : ex, ErrorType.UserLand);

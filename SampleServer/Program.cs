@@ -11,7 +11,7 @@ namespace SampleServer
     {
         static void Main(string[] args)
         {
-            SysLogger.onSysLog += SysLogger_onSysLog;
+            //SysLogger.onSysLog += SysLogger_onSysLog;
             Console.Title = "LiteCode Server";
             Server server = new Server();
 
