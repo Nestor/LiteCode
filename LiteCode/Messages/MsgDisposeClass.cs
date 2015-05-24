@@ -34,13 +34,12 @@ namespace LiteCode.Messages
             {
                 if (Client.InitializedClasses.ContainsKey(SharedClassId))
                 {
-                    SharedClass initClass = Client.InitializedClasses[SharedClassId];
                     Client.InitializedClasses[SharedClassId].IsDisposed = true;
 
                     SharedClass localSharedClass = null;
                     lock (Client.SharedClasses)
                     {
-                        if (Client.SharedClasses.TryGetValue(initClass.SharedName, out localSharedClass))
+                        if (Client.SharedClasses.TryGetValue(Client.InitializedClasses[SharedClassId].SharedName, out localSharedClass))
                         {
                             localSharedClass.SharedInitializeCounter--;
                         }

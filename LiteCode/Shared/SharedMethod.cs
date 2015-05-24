@@ -3,6 +3,7 @@ using LiteCode.Messages;
 using SecureSocketProtocol3.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -30,6 +31,9 @@ namespace LiteCode.Shared
 
         public uint TimeOutLength { get; private set; }
         public object TimeOutValue { get; private set; }
+
+        [NonSerialized]
+        public Func<Object, Object[], Object> CallCache;
 
         internal SharedMethod(MethodInfo info, SharedClass sharedClass, bool isDelegate = false, int DelegateId = 0)
         {

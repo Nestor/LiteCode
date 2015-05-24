@@ -13,6 +13,8 @@ namespace SampleClient
 {
     public class Client : SSPClient
     {
+        public ISharedTest SharedTest;
+
         public Client()
             : base(new ClientProps())
         {
@@ -27,29 +29,35 @@ namespace SampleClient
             LiteCodeClient liteCode = new LiteCodeClient(this);
             liteCode.Connect();
 
-            ISharedTest SharedTest = liteCode.GetSharedClass<ISharedTest>("SharedTest");
+            SharedTest = liteCode.GetSharedClass<ISharedTest>("SharedTest");
 
-            SharedTest.CallTest();
-            SharedTest.CallTest(1234);
-            SharedTest.CallTest("test");
-            SharedTest.CallTest(ulong.MaxValue);
+            //SharedTest.CallTest();
+            //SharedTest.CallTest(1234);
+            //SharedTest.CallTest("test");
+            //SharedTest.CallTest(ulong.MaxValue);
 
             //Console.WriteLine("ByteArrayTest");
             //byte[] ret_Array = SharedTest.ByteArrayTest();
 
             //Console.WriteLine("CallTest");
             //SharedTest.CallTest();
-            SharedTest.DelegateTest(new DelegateTestCallback(CallbackDelegate));
+            //SharedTest.DelegateTest(new DelegateTestCallback(CallbackDelegate));
 
-            Console.WriteLine("IntegerTest");
-            int ret_Int = SharedTest.IntegerTest();
+            //Console.WriteLine("IntegerTest");
+            //int ret_Int = SharedTest.IntegerTest();
 
-            Console.WriteLine("SecretShit");
-            SharedTest.SecretShit();
+            //Console.WriteLine("SecretShit");
+            //SharedTest.SecretShit();
 
-            //Console.WriteLine("SendByteArray");
-            //SharedTest.SendByteArray(ASCIIEncoding.ASCII.GetBytes("Some Data..."));
 
+            /*Console.WriteLine("SendByteArray");
+            Stopwatch sw = Stopwatch.StartNew();
+            byte[] DataTtest = ASCIIEncoding.ASCII.GetBytes("Some Data...");
+            for (int i = 0; i < 100000; i++)
+                SharedTest.SendByteArray(DataTtest);
+            sw.Stop();
+            Console.WriteLine(sw.Elapsed);
+            */
             //Console.WriteLine("StringTest");
             //string ret_String = SharedTest.StringTest();
         }

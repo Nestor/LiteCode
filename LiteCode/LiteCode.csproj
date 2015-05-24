@@ -39,7 +39,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\ExtentionAttribute.cs" />
     <Compile Include="Attributes\PacketQueueAttribute.cs" />
     <Compile Include="Attributes\RemoteConstructorAttribute.cs" />
     <Compile Include="Attributes\RemoteExecutionAttribute.cs" />
@@ -51,6 +50,7 @@
     <Compile Include="Messages\MsgExecuteMethodResponse.cs" />
     <Compile Include="Messages\MsgGetSharedClass.cs" />
     <Compile Include="Messages\MsgGetSharedClassResponse.cs" />
+    <Compile Include="Misc\FastDelegate.cs" />
     <Compile Include="Misc\NotUsedHeader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shared\DynamicClassCreator.cs" />

@@ -73,7 +73,7 @@ namespace LiteCode
 
         public int GetNextRandomInteger()
         {
-            return base.Client.Connection.GetNextRandomInteger();
+            return base.Client.GetNextRandomInteger();
         }
 
         public void Send(IMessage message)

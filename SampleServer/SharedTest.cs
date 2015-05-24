@@ -1,5 +1,6 @@
 ﻿using LiteCode.Attributes;
 using SampleLib;
+using SecureSocketProtocol3.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace SampleServer
 {
     public class SharedTest : ISharedTest
     {
+        FastRandom rnd = new FastRandom();
         public SharedTest()
         {
 
@@ -47,7 +49,8 @@ namespace SampleServer
         [RemoteExecution(30000, 0)]
         public int IntegerTest()
         {
-            return 8923;
+            Console.WriteLine("IntegerTest");
+            return rnd.Next();
         }
 
         [RemoteExecution(30000, null)]
@@ -68,10 +71,10 @@ namespace SampleServer
             Delly("HelloWorld from Server :)");
         }
 
-        [RemoteExecution(30000, null)]
+        [UncheckedRemoteExecution()]
         public void SendByteArray(byte[] data)
         {
-            Console.WriteLine("SendByteArray, Length: " + data.Length);
+            //Console.WriteLine("SendByteArray, Length: " + data.Length);
         }
 
     }

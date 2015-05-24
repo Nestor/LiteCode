@@ -1,5 +1,6 @@
 ﻿using LiteCode.Attributes;
 using LiteCode.Shared;
+using LiteCode.Misc;
 using ProtoBuf;
 using SecureSocketProtocol3;
 using SecureSocketProtocol3.Network;
@@ -132,8 +133,15 @@ namespace LiteCode.Messages
                         }
                         else
                         {
-                            MethodInfo methodInf = sClass.InitializedClass.GetType().GetMethod(sharedMethod.Name, sharedMethod.ArgumentTypes);
-                            result.ReturnValue = methodInf.Invoke(sClass.InitializedClass, args.ToArray());
+                            if (sharedMethod.CallCache == null)
+                            {
+                                MethodInfo methodInf = sClass.InitializedClass.GetType().GetMethod(sharedMethod.Name, sharedMethod.ArgumentTypes);
+                                sharedMethod.CallCache = methodInf.Bind();
+                            }
+                            result.ReturnValue = sharedMethod.CallCache(sClass.InitializedClass, args.ToArray());
+
+                            /*MethodInfo methodInf = sClass.InitializedClass.GetType().GetMethod(sharedMethod.Name, sharedMethod.ArgumentTypes);
+                            result.ReturnValue = methodInf.Invoke(sClass.InitializedClass, args.ToArray());*/
                         }
                     }
                 }
