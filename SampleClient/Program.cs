@@ -20,6 +20,7 @@ namespace SampleClient
             Stopwatch sw = Stopwatch.StartNew();
             int TimesCalled = 0;
 
+
             while (true)
             {
                 Console.ReadLine();

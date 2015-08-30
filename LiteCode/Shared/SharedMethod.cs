@@ -138,31 +138,39 @@ namespace LiteCode.Shared
                 pw.WriteBool(false);
             }
 
-            if (Unchecked || useUdp)
+            try
             {
-                //just execute the method and don't wait for response
-                sharedClass.Client.Send(new MsgExecuteMethod(0, pw.ToByteArray(), false, sharedClass.SharedId, MethodId, this.DelegateId, this.sharedClass.SharedId));
-            }
-            else
-            {
-                SyncObject syncObject = null;
-                Random rnd = new Random();
-                int RequestId = rnd.Next();
-                lock (sharedClass.Client.Requests)
+                if (Unchecked || useUdp)
                 {
-                    while (sharedClass.Client.Requests.ContainsKey(RequestId))
-                        RequestId = rnd.Next();
-                    syncObject = new SyncObject(sharedClass.Client);
-                    sharedClass.Client.Requests.Add(RequestId, syncObject);
-                    sharedClass.Client.Send(new MsgExecuteMethod(RequestId, pw.ToByteArray(), true, sharedClass.SharedId, MethodId, this.DelegateId, this.sharedClass.SharedId));
+                    //just execute the method and don't wait for response
+                    sharedClass.Client.Send(new MsgExecuteMethod(0, pw.ToByteArray(), false, sharedClass.SharedId, MethodId, this.DelegateId, this.sharedClass.SharedId));
                 }
-                RetObject = syncObject.Wait<ReturnResult>(null, TimeOutLength);
+                else
+                {
+                    SyncObject syncObject = null;
+                    Random rnd = new Random();
+                    int RequestId = rnd.Next();
+                    lock (sharedClass.Client.Requests)
+                    {
+                        while (sharedClass.Client.Requests.ContainsKey(RequestId))
+                            RequestId = rnd.Next();
+                        syncObject = new SyncObject(sharedClass.Client);
+                        sharedClass.Client.Requests.Add(RequestId, syncObject);
+                        sharedClass.Client.Send(new MsgExecuteMethod(RequestId, pw.ToByteArray(), true, sharedClass.SharedId, MethodId, this.DelegateId, this.sharedClass.SharedId));
+                    }
+                    RetObject = syncObject.Wait<ReturnResult>(null, TimeOutLength);
 
-                if (syncObject.TimedOut)
-                {
-                    //copying the object in memory, maybe a strange way todo it but it works
-                    RetObject = new ReturnResult(serializer.Deserialize(serializer.Serialize(this.TimeOutValue)), false);
+                    if (syncObject.TimedOut)
+                    {
+                        //copying the object in memory, maybe a strange way todo it but it works
+                        RetObject = new ReturnResult(serializer.Deserialize(serializer.Serialize(this.TimeOutValue)), false);
+                    }
                 }
+            }
+            catch
+            {
+                //client most likely disconnected and was unable to send the message
+                RetObject = null;
             }
 
             /*if (callback != null)
