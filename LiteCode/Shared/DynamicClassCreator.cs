@@ -10,13 +10,13 @@ namespace LiteCode.Shared
     internal class DynamicClassCreator
     {
         static object Locky = new object();
-        internal static SortedList<string, Type> TypeCache;
-        internal static ModuleBuilder modBuilder;
+        internal SortedList<string, Type> TypeCache;
+        internal ModuleBuilder modBuilder;
 
-        static DynamicClassCreator()
+        public DynamicClassCreator()
         {
             AssemblyName assemblyName = new AssemblyName();
-            assemblyName.Name = "__LiteCode__";
+            assemblyName.Name = "__LiteCode__" + DateTime.Now.Ticks;
             AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             modBuilder = asmBuilder.DefineDynamicModule(asmBuilder.GetName().Name, true);
             TypeCache = new SortedList<string, Type>();
@@ -28,7 +28,7 @@ namespace LiteCode.Shared
         /// <param name="classType">The main Type to use</param>
         /// <param name="InterfacePrototype">This interface should contain all the methods used in the ClassType</param>
         /// <returns>return Shared Class</returns>
-        public static InterfacePrototype CreateDynamicClass<InterfacePrototype>(SharedClass sharedClass)
+        public InterfacePrototype CreateDynamicClass<InterfacePrototype>(SharedClass sharedClass)
         {
             lock (Locky)
             {
@@ -65,7 +65,7 @@ namespace LiteCode.Shared
             }
         }
 
-        private static ConstructorBuilder CreateConstructor(TypeBuilder typeBuilder, FieldBuilder fb)
+        private ConstructorBuilder CreateConstructor(TypeBuilder typeBuilder, FieldBuilder fb)
         {
             ConstructorBuilder constructor = typeBuilder.DefineConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName, CallingConventions.Standard, new Type[] { typeof(SharedClass) });
             ConstructorInfo conObj = typeof(object).GetConstructor(new Type[0]);
@@ -81,7 +81,7 @@ namespace LiteCode.Shared
             return constructor;
         }
 
-        private static void CreateDeconstructor(TypeBuilder typeBuilder, FieldBuilder fb)
+        private void CreateDeconstructor(TypeBuilder typeBuilder, FieldBuilder fb)
         {
             MethodBuilder mb = typeBuilder.DefineMethod("Finalize", MethodAttributes.Private, Type.GetType("System.Void"), new Type[0]);
             ILGenerator gen = mb.GetILGenerator();
@@ -90,7 +90,7 @@ namespace LiteCode.Shared
             gen.Emit(OpCodes.Ret);
         }
 
-        private static void DuplicateMethods(TypeBuilder typeBuilder, Type target, FieldBuilder fb, SharedClass sharedClass)
+        private void DuplicateMethods(TypeBuilder typeBuilder, Type target, FieldBuilder fb, SharedClass sharedClass)
         {
             foreach (MethodInfo m in target.GetMethods())
             {
@@ -169,7 +169,7 @@ namespace LiteCode.Shared
             }
         }
 
-        private static Type[] GetParameterTypes(ParameterInfo[] parameters)
+        private Type[] GetParameterTypes(ParameterInfo[] parameters)
         {
             List<Type> args = new List<Type>();
             foreach (ParameterInfo param in parameters)
