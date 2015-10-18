@@ -12,22 +12,31 @@ namespace SampleClient
         static void Main(string[] args)
         {
             Console.Title = "LiteCode Client";
-
-            Client client = new Client();
-
-            Console.WriteLine("Press enter to see the response");
-
-            Stopwatch sw = Stopwatch.StartNew();
-            int TimesCalled = 0;
+            List<Client> Clients = new List<Client>();
 
 
             while (true)
             {
-                Console.ReadLine();
-                int returned = client.SharedTest.IntegerTest();
-                Console.WriteLine("Response from server: " + returned);
-                Console.Title = "LiteCode Client - Running For: " + sw.Elapsed + ", TimesCalled: " + TimesCalled;
-                TimesCalled++;
+                Client client = new Client();
+                Clients.Add(client);
+
+                Stopwatch sw = Stopwatch.StartNew();
+                int TimesCalled = 0;
+
+                //while (true)
+                {
+                    //Console.ReadLine();
+                    int returned = client.SharedTest.IntegerTest();
+                    TimesCalled++;
+                    //Console.WriteLine("Response from server: " + returned);
+
+                    if (TimesCalled % 1000 == 0)
+                    {
+                        Console.Title = "LiteCode Client - Running For: " + sw.Elapsed + ", TimesCalled: " + TimesCalled;
+                    }
+                }
+                Console.Title = "LiteCode Client - Clients: " + Clients.Count;
+               // Thread.Sleep(10000);
             }
 
             Process.GetCurrentProcess().WaitForExit();

@@ -21,7 +21,16 @@ namespace LiteCode
         internal SortedList<string, SharedClass> SharedClasses { get; private set; }
         internal SortedList<int, SharedClass> InitializedClasses { get; private set; }
 
-        private DynamicClassCreator dynClassCreator;
+        private DynamicClassCreator _dynClassCreator;
+        private DynamicClassCreator DynClassCreator
+        {
+            get
+            {
+                if (_dynClassCreator == null)
+                    _dynClassCreator = new DynamicClassCreator();
+                return _dynClassCreator;
+            }
+        }
 
         public LiteCodeClient(SSPClient client)
             : base(client)
@@ -41,7 +50,6 @@ namespace LiteCode
 
         public override void onBeforeConnect()
         {
-            dynClassCreator = new DynamicClassCreator();
             Requests = new SortedList<decimal, SyncObject>();
             SharedClasses = new SortedList<string, SharedClass>();
             InitializedClasses = new SortedList<int, SharedClass>();
@@ -147,7 +155,7 @@ namespace LiteCode
 
                 SharedClass c = (SharedClass)result.ReturnValue;
                 c.Client = this;
-                InterfacePrototype tmp = dynClassCreator.CreateDynamicClass<InterfacePrototype>(c);
+                InterfacePrototype tmp = DynClassCreator.CreateDynamicClass<InterfacePrototype>(c);
 
                 InitializedClasses.Add(c.SharedId, c);
                 return tmp;

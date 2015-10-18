@@ -185,7 +185,7 @@ namespace SampleClient
 
             public override ushort Handshake_MazeCount
             {
-                get { return 3; }
+                get { return 1; }
             }
         }
     }

@@ -99,12 +99,28 @@ namespace SampleServer
 
             public override ushort Handshake_MazeCount
             {
-                get { return 3; }
+                get { return 1; }
             }
 
             public override TimeSpan ClientTimeConnected
             {
                 get { return new TimeSpan(1, 0, 0, 0); }
+            }
+
+            public override string ListenIp6
+            {
+                get
+                {
+                    return "::1";
+                }
+            }
+
+            public override bool UseIPv4AndIPv6
+            {
+                get
+                {
+                    return true;
+                }
             }
         }
     }

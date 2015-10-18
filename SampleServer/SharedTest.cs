@@ -49,7 +49,7 @@ namespace SampleServer
         [RemoteExecution(30000, 0)]
         public int IntegerTest()
         {
-            Console.WriteLine("IntegerTest");
+            //Console.WriteLine("IntegerTest");
             return rnd.Next();
         }
 

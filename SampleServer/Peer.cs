@@ -23,7 +23,7 @@ namespace SampleServer
 
         public override void onDisconnect(DisconnectReason Reason)
         {
-
+            Console.WriteLine("User \"" + base.Username + "\" disconnected");
         }
 
         public override void onException(Exception ex, ErrorType errorType)
