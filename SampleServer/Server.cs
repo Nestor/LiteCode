@@ -58,21 +58,6 @@ namespace SampleServer
                 get { return new Stream[0]; }
             }
 
-            public override uint Cipher_Rounds
-            {
-                get { return 1; }
-            }
-
-            public override EncAlgorithm EncryptionAlgorithm
-            {
-                get { return EncAlgorithm.HwAES; }
-            }
-
-            public override CompressionAlgorithm CompressionAlgorithm
-            {
-                get { return SecureSocketProtocol3.CompressionAlgorithm.QuickLZ; }
-            }
-
             public override byte[] NetworkKey
             {
                 get

@@ -14,6 +14,7 @@ namespace LiteCode.Shared
         public object ReturnValue;
         public string exceptionMessage;
         public bool ExceptionOccured;
+        public bool UseTimeoutValue;
 
         public ReturnResult(object ReturnValue, bool ExceptionOccured, string exceptionMessage = "")
         {
@@ -41,6 +42,7 @@ namespace LiteCode.Shared
                 this.ReturnValue = obj.ReturnValue;
                 this.exceptionMessage = obj.exceptionMessage;
                 this.ExceptionOccured = obj.ExceptionOccured;
+                this.UseTimeoutValue = obj.UseTimeoutValue;
             }
             return this;
         }

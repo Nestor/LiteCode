@@ -28,6 +28,7 @@ namespace LiteCode.Shared
         private Random rnd = new Random(new Random(DateTime.Now.Millisecond).Next());
         public bool usePacketQueue { get; private set; }
         public bool useUdp { get; private set; }
+        public bool NoExceptions { get; private set; }
 
         public uint TimeOutLength { get; private set; }
         public object TimeOutValue { get; private set; }
@@ -66,6 +67,7 @@ namespace LiteCode.Shared
             this.Unchecked = (info.GetCustomAttributes(typeof(UncheckedRemoteExecutionAttribute), false).Length > 0);
             this.usePacketQueue = (info.GetCustomAttributes(typeof(PacketQueueAttribute), false).Length > 0);
             this.useUdp = (info.GetCustomAttributes(typeof(UdpMethodAttribute), false).Length > 0);
+            this.NoExceptions = (info.GetCustomAttributes(typeof(NoExceptionAttribute), false).Length > 0);
 
             object[] tempAttr = info.GetCustomAttributes(typeof(RemoteExecutionAttribute), false);
             if (tempAttr.Length > 0)
@@ -160,7 +162,7 @@ namespace LiteCode.Shared
                     }
                     RetObject = syncObject.Wait<ReturnResult>(null, TimeOutLength);
 
-                    if (syncObject.TimedOut)
+                    if (syncObject.TimedOut || (RetObject as ReturnResult != null && (RetObject as ReturnResult).UseTimeoutValue))
                     {
                         //copying the object in memory, maybe a strange way todo it but it works
                         RetObject = new ReturnResult(serializer.Deserialize(serializer.Serialize(this.TimeOutValue)), false);

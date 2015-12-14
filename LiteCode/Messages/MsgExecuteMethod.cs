@@ -77,6 +77,7 @@ namespace LiteCode.Messages
         {
             ReturnResult result = new ReturnResult(null, false);
             LiteCodeClient Client = OpSocket as LiteCodeClient;
+            SharedMethod sharedMethod = null;
 
             try
             {
@@ -85,7 +86,7 @@ namespace LiteCode.Messages
 
                 if (Client.InitializedClasses.TryGetValue(SharedClassId, out sClass))
                 {
-                    SharedMethod sharedMethod = sClass.GetMethod(MethodId);
+                    sharedMethod = sClass.GetMethod(MethodId);
 
                     if (sharedMethod != null)
                     {
@@ -151,6 +152,14 @@ namespace LiteCode.Messages
                 result.exceptionMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 result.ExceptionOccured = true;
                 client.onException(ex.InnerException != null ? ex.InnerException : ex, ErrorType.UserLand);
+
+                if (sharedMethod != null && sharedMethod.NoExceptions)
+                {
+                    result.exceptionMessage = null;
+                    result.ExceptionOccured = false;
+                    result.ReturnValue = null;
+                    result.UseTimeoutValue = true;
+                }
             }
 
             if (RequireResultBack)

@@ -1,6 +1,8 @@
 ﻿using LiteCode;
 using SecureSocketProtocol3;
 using SecureSocketProtocol3.Network;
+using SecureSocketProtocol3.Security.DataIntegrity;
+using SecureSocketProtocol3.Security.Layers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +53,23 @@ namespace SampleServer
         }
         public override void onOperationalSocket_Connected(OperationalSocket OPSocket)
         {
+        }
+
+        public override void onApplyLayers(SecureSocketProtocol3.Security.Layers.LayerSystem layerSystem)
+        {
+            layerSystem.AddLayer(new QuickLzLayer());
+            layerSystem.AddLayer(new AesLayer(base.Connection));
+        }
+
+        private HMacLayer hMacLayer;
+        public override SecureSocketProtocol3.Security.DataIntegrity.IDataIntegrityLayer DataIntegrityLayer
+        {
+            get
+            {
+                if (hMacLayer == null)
+                    hMacLayer = new HMacLayer(this);
+                return hMacLayer;
+            }
         }
     }
 }

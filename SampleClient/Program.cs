@@ -15,24 +15,30 @@ namespace SampleClient
             List<Client> Clients = new List<Client>();
 
 
-            while (true)
+            //while (true)
             {
                 Client client = new Client();
                 Clients.Add(client);
 
                 Stopwatch sw = Stopwatch.StartNew();
+                Stopwatch PerSecSw = Stopwatch.StartNew();
                 int TimesCalled = 0;
+                int TimesCalledPerSec = 0;
 
-                //while (true)
+                while (true)
                 {
                     //Console.ReadLine();
                     int returned = client.SharedTest.IntegerTest();
                     TimesCalled++;
+                    TimesCalledPerSec++;
                     //Console.WriteLine("Response from server: " + returned);
 
-                    if (TimesCalled % 1000 == 0)
+                    if (PerSecSw.ElapsedMilliseconds >= 1000)
                     {
                         Console.Title = "LiteCode Client - Running For: " + sw.Elapsed + ", TimesCalled: " + TimesCalled;
+                        Console.WriteLine("Speed per sec: " + TimesCalledPerSec);
+                        TimesCalledPerSec = 0;
+                        PerSecSw = Stopwatch.StartNew();
                     }
                 }
                 Console.Title = "LiteCode Client - Clients: " + Clients.Count;

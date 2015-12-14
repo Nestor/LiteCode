@@ -2,6 +2,8 @@
 using SampleLib;
 using SecureSocketProtocol3;
 using SecureSocketProtocol3.Network;
+using SecureSocketProtocol3.Security.DataIntegrity;
+using SecureSocketProtocol3.Security.Layers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -97,6 +99,23 @@ namespace SampleClient
 
         }
 
+        public override void onApplyLayers(SecureSocketProtocol3.Security.Layers.LayerSystem layerSystem)
+        {
+            layerSystem.AddLayer(new QuickLzLayer());
+            layerSystem.AddLayer(new AesLayer(base.Connection));
+        }
+
+        private HMacLayer hMacLayer;
+        public override SecureSocketProtocol3.Security.DataIntegrity.IDataIntegrityLayer DataIntegrityLayer
+        {
+            get
+            {
+                if (hMacLayer == null)
+                    hMacLayer = new HMacLayer(this);
+                return hMacLayer;
+            }
+        }
+
         private class ClientProps : ClientProperties
         {
 
@@ -156,21 +175,6 @@ namespace SampleClient
                         218, 155
                     };
                 }
-            }
-
-            public override uint Cipher_Rounds
-            {
-                get { return 1; }
-            }
-
-            public override EncAlgorithm EncryptionAlgorithm
-            {
-                get { return EncAlgorithm.HwAES; }
-            }
-
-            public override CompressionAlgorithm CompressionAlgorithm
-            {
-                get { return SecureSocketProtocol3.CompressionAlgorithm.QuickLZ; }
             }
 
             public override System.Drawing.Size Handshake_Maze_Size
