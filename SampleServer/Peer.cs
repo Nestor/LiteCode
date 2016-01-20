@@ -57,8 +57,8 @@ namespace SampleServer
 
         public override void onApplyLayers(SecureSocketProtocol3.Security.Layers.LayerSystem layerSystem)
         {
-            layerSystem.AddLayer(new QuickLzLayer());
-            layerSystem.AddLayer(new AesLayer(base.Connection));
+            //layerSystem.AddLayer(new QuickLzLayer());
+            //layerSystem.AddLayer(new AesLayer(base.Connection));
         }
 
         private HMacLayer hMacLayer;
@@ -70,6 +70,11 @@ namespace SampleServer
                     hMacLayer = new HMacLayer(this);
                 return hMacLayer;
             }
+        }
+
+        public override void onApplyHandshakes(SecureSocketProtocol3.Security.Handshakes.HandshakeSystem handshakeSystem)
+        {
+
         }
     }
 }

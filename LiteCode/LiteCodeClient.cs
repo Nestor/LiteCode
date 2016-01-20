@@ -155,7 +155,7 @@ namespace LiteCode
 
                 SharedClass c = (SharedClass)result.ReturnValue;
                 c.Client = this;
-                InterfacePrototype tmp = DynClassCreator.CreateDynamicClass<InterfacePrototype>(c);
+                InterfacePrototype tmp = DynamicClassCreator.CreateDynamicClass<InterfacePrototype>(name, c);
 
                 InitializedClasses.Add(c.SharedId, c);
                 return tmp;

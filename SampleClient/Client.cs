@@ -101,8 +101,8 @@ namespace SampleClient
 
         public override void onApplyLayers(SecureSocketProtocol3.Security.Layers.LayerSystem layerSystem)
         {
-            layerSystem.AddLayer(new QuickLzLayer());
-            layerSystem.AddLayer(new AesLayer(base.Connection));
+            //layerSystem.AddLayer(new QuickLzLayer());
+            //layerSystem.AddLayer(new AesLayer(base.Connection));
         }
 
         private HMacLayer hMacLayer;
@@ -134,35 +134,6 @@ namespace SampleClient
                 get { return 30000; }
             }
 
-            public override string Username
-            {
-                get { return "UserTest"; }
-            }
-
-            public override string Password
-            {
-                get { return "PassTest"; }
-            }
-
-            public override Stream[] PrivateKeyFiles
-            {
-                get
-                {
-                    List<MemoryStream> keys = new List<MemoryStream>();
-                    keys.Add(new MemoryStream(File.ReadAllBytes(@".\Data\PrivateKey1.dat")));
-                    keys.Add(new MemoryStream(File.ReadAllBytes(@".\Data\PrivateKey2.dat")));
-                    return keys.ToArray();
-                }
-            }
-
-            public override Stream PublicKeyFile
-            {
-                get
-                {
-                    return new MemoryStream(File.ReadAllBytes(@".\Data\PublicKey1.dat"));
-                }
-            }
-
             public override byte[] NetworkKey
             {
                 get
@@ -176,21 +147,11 @@ namespace SampleClient
                     };
                 }
             }
+        }
 
-            public override System.Drawing.Size Handshake_Maze_Size
-            {
-                get { return new System.Drawing.Size(128, 128); }
-            }
+        public override void onApplyHandshakes(SecureSocketProtocol3.Security.Handshakes.HandshakeSystem handshakeSystem)
+        {
 
-            public override ushort Handshake_StepSize
-            {
-                get { return 10; }
-            }
-
-            public override ushort Handshake_MazeCount
-            {
-                get { return 1; }
-            }
         }
     }
 }

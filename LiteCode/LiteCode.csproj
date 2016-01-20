@@ -62,9 +62,7 @@
     <Compile Include="Shared\SharedDelegateInfo.cs" />
     <Compile Include="Shared\SharedMethod.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Shared\SharedClasses\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\SecureSocketProtocol\SecureSocketProtocol3\SecureSocketProtocol3.csproj">
       <Project>{4615f7f9-8ec2-4005-8e82-657b0f196051}</Project>

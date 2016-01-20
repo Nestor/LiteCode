@@ -9,14 +9,14 @@ namespace LiteCode.Shared
 {
     internal class DynamicClassCreator
     {
-        static object Locky = new object();
-        internal SortedList<string, Type> TypeCache;
-        internal ModuleBuilder modBuilder;
+        private static object Locky = new object();
+        internal static SortedList<string, Type> TypeCache;
+        internal static ModuleBuilder modBuilder;
 
-        public DynamicClassCreator()
+        static DynamicClassCreator()
         {
             AssemblyName assemblyName = new AssemblyName();
-            assemblyName.Name = "__LiteCode__" + DateTime.Now.Ticks;
+            assemblyName.Name = "__LiteCode__";
             AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             modBuilder = asmBuilder.DefineDynamicModule(asmBuilder.GetName().Name, true);
             TypeCache = new SortedList<string, Type>();
@@ -28,7 +28,7 @@ namespace LiteCode.Shared
         /// <param name="classType">The main Type to use</param>
         /// <param name="InterfacePrototype">This interface should contain all the methods used in the ClassType</param>
         /// <returns>return Shared Class</returns>
-        public InterfacePrototype CreateDynamicClass<InterfacePrototype>(SharedClass sharedClass)
+        public static InterfacePrototype CreateDynamicClass<InterfacePrototype>(string ShareName, SharedClass sharedClass)
         {
             lock (Locky)
             {
@@ -36,16 +36,17 @@ namespace LiteCode.Shared
                 if (!prototype.IsInterface || !prototype.IsPublic)
                     throw new Exception("InterfacePrototype must be a interface and public");
 
-                if (!TypeCache.ContainsKey(prototype.FullName))
+                string FullName = ShareName + "_dyn_" + prototype.Name;
+                if (!TypeCache.ContainsKey(FullName))
                 {
-                    TypeBuilder typeBuilder = modBuilder.DefineType("dyn_" + prototype.Name, TypeAttributes.Public |
-                                                                                             TypeAttributes.Class |
-                                                                                             TypeAttributes.AutoClass |
-                                                                                             TypeAttributes.AnsiClass |
-                                                                                             TypeAttributes.BeforeFieldInit |
-                                                                                             TypeAttributes.AutoLayout,
-                                                                                             typeof(object),
-                                                                                             new Type[] { prototype });
+                    TypeBuilder typeBuilder = modBuilder.DefineType(FullName, TypeAttributes.Public |
+                                                                              TypeAttributes.Class |
+                                                                              TypeAttributes.AutoClass |
+                                                                              TypeAttributes.AnsiClass |
+                                                                              TypeAttributes.BeforeFieldInit |
+                                                                              TypeAttributes.AutoLayout,
+                                                                              typeof(object),
+                                                                              new Type[] { prototype });
 
                     //add our RootSocket info, I did on purpose "$" so u can't directly access this variable
                     FieldBuilder fb = typeBuilder.DefineField("$haredClass", typeof(SharedClass), FieldAttributes.Public);
@@ -55,17 +56,17 @@ namespace LiteCode.Shared
                     CreateDeconstructor(typeBuilder, fb);
 
                     Type InitType = typeBuilder.CreateType();
-                    TypeCache.Add(prototype.FullName, InitType);
+                    TypeCache.Add(FullName, InitType);
                     return (InterfacePrototype)InitType.GetConstructor(new Type[] { typeof(SharedClass) }).Invoke(new object[] { sharedClass });
                 }
                 else
                 {
-                    return (InterfacePrototype)TypeCache[prototype.FullName].GetConstructor(new Type[] { typeof(SharedClass) }).Invoke(new object[] { sharedClass });
+                    return (InterfacePrototype)TypeCache[FullName].GetConstructor(new Type[] { typeof(SharedClass) }).Invoke(new object[] { sharedClass });
                 }
             }
         }
 
-        private ConstructorBuilder CreateConstructor(TypeBuilder typeBuilder, FieldBuilder fb)
+        private static ConstructorBuilder CreateConstructor(TypeBuilder typeBuilder, FieldBuilder fb)
         {
             ConstructorBuilder constructor = typeBuilder.DefineConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName, CallingConventions.Standard, new Type[] { typeof(SharedClass) });
             ConstructorInfo conObj = typeof(object).GetConstructor(new Type[0]);
@@ -81,7 +82,7 @@ namespace LiteCode.Shared
             return constructor;
         }
 
-        private void CreateDeconstructor(TypeBuilder typeBuilder, FieldBuilder fb)
+        private static void CreateDeconstructor(TypeBuilder typeBuilder, FieldBuilder fb)
         {
             MethodBuilder mb = typeBuilder.DefineMethod("Finalize", MethodAttributes.Private, Type.GetType("System.Void"), new Type[0]);
             ILGenerator gen = mb.GetILGenerator();
@@ -90,7 +91,7 @@ namespace LiteCode.Shared
             gen.Emit(OpCodes.Ret);
         }
 
-        private void DuplicateMethods(TypeBuilder typeBuilder, Type target, FieldBuilder fb, SharedClass sharedClass)
+        private static void DuplicateMethods(TypeBuilder typeBuilder, Type target, FieldBuilder fb, SharedClass sharedClass)
         {
             foreach (MethodInfo m in target.GetMethods())
             {
@@ -169,7 +170,7 @@ namespace LiteCode.Shared
             }
         }
 
-        private Type[] GetParameterTypes(ParameterInfo[] parameters)
+        private static Type[] GetParameterTypes(ParameterInfo[] parameters)
         {
             List<Type> args = new List<Type>();
             foreach (ParameterInfo param in parameters)

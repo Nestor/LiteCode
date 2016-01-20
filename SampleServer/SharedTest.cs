@@ -77,5 +77,10 @@ namespace SampleServer
             //Console.WriteLine("SendByteArray, Length: " + data.Length);
         }
 
+        [RemoteExecution(30000, null)]
+        public int IntegerTestError()
+        {
+            return 1337;
+        }
     }
 }

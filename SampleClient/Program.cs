@@ -41,6 +41,7 @@ namespace SampleClient
                         PerSecSw = Stopwatch.StartNew();
                     }
                 }
+                //client.Disconnect();
                 Console.Title = "LiteCode Client - Clients: " + Clients.Count;
                // Thread.Sleep(10000);
             }

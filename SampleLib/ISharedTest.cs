@@ -20,5 +20,7 @@ namespace SampleLib
         void SecretShit();
         void DelegateTest(DelegateTestCallback Delly);
         void SendByteArray(byte[] data);
+
+        //int IntegerTestError();
     }
 }

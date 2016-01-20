@@ -19,25 +19,7 @@ namespace SampleServer
 
         public override SSPClient GetNewClient()
         {
-            //register users if there aren't any, please use a database and not this way
-            if (Users == null)
-            {
-                Users = new SortedList<string, User.UserDbInfo>();
-                List<Stream> keys = new List<Stream>();
-                keys.Add(new MemoryStream(File.ReadAllBytes(@".\Data\PrivateKey1.dat")));
-                keys.Add(new MemoryStream(File.ReadAllBytes(@".\Data\PrivateKey2.dat")));
-                User user = base.RegisterUser("UserTest", "PassTest", keys, new MemoryStream(File.ReadAllBytes(@".\Data\PublicKey1.dat")));
-
-                Users.Add(user.EncryptedHash, user.GetUserDbInfo());
-            }
             return new Peer();
-        }
-
-        public override User.UserDbInfo onFindUser(string EncryptedPublicKeyHash)
-        {
-            if (Users.ContainsKey(EncryptedPublicKeyHash))
-                return Users[EncryptedPublicKeyHash];
-            return null;
         }
 
         private class ServerProps : ServerProperties
@@ -71,22 +53,6 @@ namespace SampleServer
                     };
                 }
             }
-
-            public override System.Drawing.Size Handshake_Maze_Size
-            {
-                get { return new System.Drawing.Size(128, 128); }
-            }
-
-            public override ushort Handshake_StepSize
-            {
-                get { return 10; }
-            }
-
-            public override ushort Handshake_MazeCount
-            {
-                get { return 1; }
-            }
-
             public override TimeSpan ClientTimeConnected
             {
                 get { return new TimeSpan(1, 0, 0, 0); }
@@ -96,7 +62,7 @@ namespace SampleServer
             {
                 get
                 {
-                    return "::1";
+                    return "::";
                 }
             }
 
