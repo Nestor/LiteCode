@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using SecureSocketProtocol3.Security.Serialization;
 
 namespace LiteCode.Messages
 {

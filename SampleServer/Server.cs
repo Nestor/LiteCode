@@ -1,5 +1,6 @@
 ﻿using SecureSocketProtocol3;
 using SecureSocketProtocol3.Network;
+using SecureSocketProtocol3.Security.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -72,6 +73,11 @@ namespace SampleServer
                 {
                     return true;
                 }
+            }
+
+            public override SecureSocketProtocol3.Security.Serialization.ISerialization DefaultSerializer
+            {
+                get { return new ProtobufSerialization(); }
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using LiteCode.Shared;
 using ProtoBuf;
 using SecureSocketProtocol3.Network.Messages;
+using SecureSocketProtocol3.Security.Serialization;
 using SecureSocketProtocol3.Utils;
 using System;
 using System.Collections.Generic;
