@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using SecureSocketProtocol3.Security.Serialization;
+using System.IO;
 
 namespace LiteCode.Messages
 {
@@ -19,36 +20,27 @@ namespace LiteCode.Messages
     internal class MsgExecuteMethod : IMessage
     {
         [ProtoMember(1)]
-        public byte[] ResultData { get; set; }
-
-        [ProtoMember(2)]
         public int RequestId { get; set; }
 
-        [ProtoMember(3)]
+        [ProtoMember(2)]
         public byte[] Data { get; set; }
 
-        [ProtoMember(4)]
+        [ProtoMember(3)]
         public bool RequireResultBack { get; set; }
 
-        [ProtoMember(5)]
+        [ProtoMember(4)]
         public int SharedClassId { get; set; }
 
-        [ProtoMember(6)]
+        [ProtoMember(5)]
         public int MethodId { get; set; }
 
-        [ProtoMember(7)]
+        [ProtoMember(6)]
         public int DelegateId { get; set; }
 
-        [ProtoMember(8)]
+        [ProtoMember(7)]
         public int DelegateClassId { get; set; }
 
         bool isDelegate { get { return DelegateId > 0; } }
-
-        public ReturnResult Result
-        {
-            get { return new ReturnResult().Deserialize(ResultData); }
-            set { ResultData = value.Serialize(); }
-        }
 
         public MsgExecuteMethod()
             : base()
@@ -88,7 +80,7 @@ namespace LiteCode.Messages
                 if (Client.InitializedClasses.TryGetValue(SharedClassId, out sClass))
                 {
                     sharedMethod = sClass.GetMethod(MethodId);
-
+                    
                     if (sharedMethod != null)
                     {
                         List<object> args = new List<object>();
@@ -99,18 +91,37 @@ namespace LiteCode.Messages
                         lock (sharedMethod.Delegates)
                         {
                             SharedDelegate sharedDel = null;
+
                             if (sharedMethod.Delegates.TryGetValue(DelegateId, out sharedDel))
                             {
                                 for (int i = 0; i < sharedDel.sharedMethod.ArgumentTypes.Length; i++)
                                 {
-                                    args.Add(serializer.Deserialize(pr.ReadBytes(pr.ReadInteger())));
+                                    int length = pr.ReadInteger();
+
+                                    if (length == 0)
+                                    {
+                                        args.Add(null);
+                                        continue;
+                                    }
+
+                                    args.Add(Serializer.Deserialize(new MemoryStream(pr.Buffer, pr.Position, length), sharedDel.sharedMethod.ArgumentTypes[i]));
+                                    pr.Position += length;
                                 }
                             }
                             else
                             {
                                 for (int i = 0; i < sharedMethod.ArgumentTypes.Length; i++)
                                 {
-                                    args.Add(serializer.Deserialize(pr.ReadBytes(pr.ReadInteger())));
+                                    int length = pr.ReadInteger();
+
+                                    if (length == 0)
+                                    {
+                                        args.Add(null);
+                                        continue;
+                                    }
+
+                                    args.Add(Serializer.Deserialize(new MemoryStream(pr.Buffer, pr.Position, length), sharedMethod.ArgumentTypes[i]));
+                                    pr.Position += length;
                                 }
                             }
                         }

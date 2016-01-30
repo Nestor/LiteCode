@@ -25,10 +25,10 @@ namespace SampleClient
                 int TimesCalled = 0;
                 int TimesCalledPerSec = 0;
 
-                while (true)
+                while (false)
                 {
                     //Console.ReadLine();
-                    int returned = client.SharedTest.IntegerTest();
+                    client.SharedTest.CallTest(1234);
                     TimesCalled++;
                     TimesCalledPerSec++;
                     //Console.WriteLine("Response from server: " + returned);

@@ -52,6 +52,7 @@
     <Compile Include="Messages\MsgGetSharedClass.cs" />
     <Compile Include="Messages\MsgGetSharedClassResponse.cs" />
     <Compile Include="Misc\FastDelegate.cs" />
+    <Compile Include="Misc\MethodSerializedArgument.cs" />
     <Compile Include="Misc\NotUsedHeader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shared\DynamicClassCreator.cs" />

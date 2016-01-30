@@ -4,6 +4,7 @@ using SecureSocketProtocol3.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -106,9 +107,12 @@ namespace LiteCode.Shared
                 if (DelegateIndex.ContainsKey(i))
                     obj = null;
 
-                byte[] SerializedObj = serializer.Serialize(obj);
-                pw.WriteInteger(SerializedObj.Length);
-                pw.WriteBytes(SerializedObj);
+                using (MemoryStream TempStream = new MemoryStream())
+                {
+                    ProtoBuf.Serializer.Serialize(TempStream, obj);
+                    pw.WriteInteger((int)TempStream.Length);
+                    pw.WriteBytes(TempStream.GetBuffer(), 0, (int)TempStream.Length);
+                }
             }
 
             for (int i = 0; i < DelegateIndex.Count; i++)
@@ -160,12 +164,18 @@ namespace LiteCode.Shared
                         sharedClass.Client.Requests.Add(RequestId, syncObject);
                         sharedClass.Client.Send(new MsgExecuteMethod(RequestId, pw.ToByteArray(), true, sharedClass.SharedId, MethodId, this.DelegateId, this.sharedClass.SharedId));
                     }
-                    RetObject = syncObject.Wait<ReturnResult>(null, TimeOutLength);
 
-                    if (syncObject.TimedOut || (RetObject as ReturnResult != null && (RetObject as ReturnResult).UseTimeoutValue))
+                    MsgExecuteMethodResponse response = syncObject.Wait<MsgExecuteMethodResponse>(null, TimeOutLength);
+                    
+                    if(response != null)
                     {
-                        //copying the object in memory, maybe a strange way todo it but it works
-                        RetObject = new ReturnResult(serializer.Deserialize(serializer.Serialize(this.TimeOutValue)), false);
+                        RetObject = response.GetReturnResult(ReturnType);
+
+                        if (syncObject.TimedOut || (RetObject as ReturnResult != null && (RetObject as ReturnResult).UseTimeoutValue))
+                        {
+                            //copying the object in memory, maybe a strange way todo it but it works
+                            RetObject = new ReturnResult(serializer.Deserialize(serializer.Serialize(this.TimeOutValue)), false);
+                        }
                     }
                 }
             }

@@ -34,6 +34,8 @@ namespace SampleClient
 
             SharedTest = liteCode.GetSharedClass<ISharedTest>("SharedTest");
 
+
+
             //SharedTest.CallTest();
             //SharedTest.CallTest(1234);
             //SharedTest.CallTest("test");
@@ -44,7 +46,7 @@ namespace SampleClient
 
             //Console.WriteLine("CallTest");
             //SharedTest.CallTest();
-            //SharedTest.DelegateTest(new DelegateTestCallback(CallbackDelegate));
+            SharedTest.DelegateTest(new DelegateTestCallback(CallbackDelegate));
 
             //Console.WriteLine("IntegerTest");
             //int ret_Int = SharedTest.IntegerTest();

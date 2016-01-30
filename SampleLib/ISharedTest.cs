@@ -13,6 +13,7 @@ namespace SampleLib
         void CallTest(int test);
         void CallTest(string test);
         void CallTest(object test);
+        void CallTest(int[] test);
 
         string StringTest();
         int IntegerTest();

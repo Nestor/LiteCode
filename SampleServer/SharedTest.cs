@@ -25,7 +25,13 @@ namespace SampleServer
         [RemoteExecution(30000, null)]
         public void CallTest(int test)
         {
-            Console.WriteLine("CallTest() " + test);
+            //Console.WriteLine("CallTest() " + test);
+        }
+
+        [RemoteExecution(30000, null)]
+        public void CallTest(int[] test)
+        {
+            //Console.WriteLine("CallTest() " + test);
         }
 
         [RemoteExecution(30000, null)]
