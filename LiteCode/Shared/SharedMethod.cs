@@ -18,7 +18,7 @@ namespace LiteCode.Shared
         public Type[] ArgumentTypes { get; internal set; }
         public bool CanReturn { get; internal set; }
         public Type ReturnType { get; internal set; }
-        internal SharedClass sharedClass;
+        public SharedClass SharedClass { get; internal set; }
         internal int MethodId { get; set; }
         internal object InvokeLocky = new object();
         public bool Unchecked { get; internal set; }
@@ -35,6 +35,9 @@ namespace LiteCode.Shared
         public object TimeOutValue { get; private set; }
 
         [NonSerialized]
+        internal List<HookAttribute> Hooks;
+
+        [NonSerialized]
         public Func<Object, Object[], Object> CallCache;
 
         internal SharedMethod(MethodInfo info, SharedClass sharedClass, bool isDelegate = false, int DelegateId = 0)
@@ -42,6 +45,7 @@ namespace LiteCode.Shared
             this.Name = info.Name;
             this.DelegateIndex = new SortedList<int, SharedDelegateInfo>();
             this.Delegates = new SortedList<int, SharedDelegate>();
+            this.Hooks = new List<HookAttribute>();
 
             ParameterInfo[] parameters = info.GetParameters();
             List<Type> types = new List<Type>();
@@ -77,10 +81,19 @@ namespace LiteCode.Shared
                 TimeOutValue = (tempAttr[0] as RemoteExecutionAttribute).TimeOutValue;
             }
 
+            foreach (object hookAttribute in info.GetCustomAttributes(typeof(HookAttribute), true))
+            {
+                HookAttribute hook = Activator.CreateInstance(hookAttribute.GetType()) as HookAttribute;
+                if (hook != null)
+                {
+                    Hooks.Add(hook);
+                }
+            }
+
             types.Clear();
             types = null;
             this.CanReturn = info.ReturnType.FullName != "System.Void";
-            this.sharedClass = sharedClass;
+            this.SharedClass = sharedClass;
             this.isDelegate = isDelegate;
             this.DelegateId = DelegateId;
         }
@@ -129,7 +142,7 @@ namespace LiteCode.Shared
                         id = rnd.Next();
 
                     pw.WriteBool(true);
-                    SharedDelegate sharedDel = new SharedDelegate(del.Method, sharedClass, del.GetType(), id, del, this.MethodId);
+                    SharedDelegate sharedDel = new SharedDelegate(del.Method, SharedClass, del.GetType(), id, del, this.MethodId);
                     sharedDel.sharedMethod.Unchecked = this.Unchecked; //DelegateIndex.Values[i].isUnchecked;
                     sharedDel.sharedMethod.usePacketQueue = this.usePacketQueue;//DelegateIndex.Values[i].UsePacketQueue;
                     sharedDel.sharedMethod.useUdp = this.useUdp;//DelegateIndex.Values[i].UseUDP;
@@ -149,20 +162,20 @@ namespace LiteCode.Shared
                 if (Unchecked || useUdp)
                 {
                     //just execute the method and don't wait for response
-                    sharedClass.Client.Send(new MsgExecuteMethod(0, pw.ToByteArray(), false, sharedClass.SharedId, MethodId, this.DelegateId, this.sharedClass.SharedId));
+                    SharedClass.Client.Send(new MsgExecuteMethod(0, pw.ToByteArray(), false, SharedClass.SharedId, MethodId, this.DelegateId, this.SharedClass.SharedId));
                 }
                 else
                 {
                     SyncObject syncObject = null;
                     Random rnd = new Random();
                     int RequestId = rnd.Next();
-                    lock (sharedClass.Client.Requests)
+                    lock (SharedClass.Client.Requests)
                     {
-                        while (sharedClass.Client.Requests.ContainsKey(RequestId))
+                        while (SharedClass.Client.Requests.ContainsKey(RequestId))
                             RequestId = rnd.Next();
-                        syncObject = new SyncObject(sharedClass.Client);
-                        sharedClass.Client.Requests.Add(RequestId, syncObject);
-                        sharedClass.Client.Send(new MsgExecuteMethod(RequestId, pw.ToByteArray(), true, sharedClass.SharedId, MethodId, this.DelegateId, this.sharedClass.SharedId));
+                        syncObject = new SyncObject(SharedClass.Client);
+                        SharedClass.Client.Requests.Add(RequestId, syncObject);
+                        SharedClass.Client.Send(new MsgExecuteMethod(RequestId, pw.ToByteArray(), true, SharedClass.SharedId, MethodId, this.DelegateId, this.SharedClass.SharedId));
                     }
 
                     MsgExecuteMethodResponse response = syncObject.Wait<MsgExecuteMethodResponse>(null, TimeOutLength);
@@ -206,7 +219,7 @@ namespace LiteCode.Shared
 
         public object Invoke(params object[] args)
         {
-            if (sharedClass.IsDisposed)
+            if (SharedClass.IsDisposed)
                 throw new Exception("The shared class is disposed");
 
             object obj = null;
@@ -232,7 +245,7 @@ namespace LiteCode.Shared
             Name = null;
             ArgumentTypes = null;
             ReturnType = null;
-            sharedClass = null;
+            SharedClass = null;
         }
     }
 }

@@ -24,7 +24,7 @@ namespace LiteCode.Shared
 
         public object Invoke(params object[] args)
         {
-            if (sharedMethod.sharedClass.IsDisposed)
+            if (sharedMethod.SharedClass.IsDisposed)
                 throw new Exception("The shared class is disposed");
 
             ReturnResult ret = sharedMethod.Invoke(args) as ReturnResult;

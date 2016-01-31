@@ -27,7 +27,7 @@ namespace LiteCode.Shared
         {
             lock (IncrementalName)
             {
-                int SharedId = sharedDel.sharedMethod.sharedClass.SharedId;
+                int SharedId = sharedDel.sharedMethod.SharedClass.SharedId;
 
                 if (!cache.ContainsKey(SharedId))
                     cache.Add(SharedId, new SortedList<int, Delegate>());

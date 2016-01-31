@@ -87,9 +87,9 @@ namespace LiteCode
             return base.Client.GetNextRandomInteger();
         }
 
-        public void Send(IMessage message)
+        public int Send(IMessage message)
         {
-            base.SendMessage(message, new NotUsedHeader());
+            return base.SendMessage(message, new NotUsedHeader());
         }
 
         /// <summary> Share a class with other clients to use for remote code execution </summary>

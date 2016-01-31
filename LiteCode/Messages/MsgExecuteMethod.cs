@@ -71,6 +71,7 @@ namespace LiteCode.Messages
             ReturnResult result = new ReturnResult(null, false);
             LiteCodeClient Client = OpSocket as LiteCodeClient;
             SharedMethod sharedMethod = null;
+            object[] UsedArguments = null;
 
             try
             {
@@ -133,7 +134,7 @@ namespace LiteCode.Messages
                                 if (pr.ReadByte() == 1)
                                 {
                                     SharedDelegate del = pr.ReadObject<SharedDelegate>();
-                                    del.sharedMethod.sharedClass = sClass;
+                                    del.sharedMethod.SharedClass = sClass;
                                     args[sharedMethod.DelegateIndex.Keys[i]] = DynamicDelegateCreator.CreateDelegate(del);
                                     SharedDelegates.Add(del.sharedMethod.DelegateId, del);
                                 }
@@ -151,7 +152,16 @@ namespace LiteCode.Messages
                                 MethodInfo methodInf = sClass.InitializedClass.GetType().GetMethod(sharedMethod.Name, sharedMethod.ArgumentTypes);
                                 sharedMethod.CallCache = methodInf.Bind();
                             }
-                            result.ReturnValue = sharedMethod.CallCache(sClass.InitializedClass, args.ToArray());
+
+                            UsedArguments = args.ToArray();
+
+                            //pre-call the hooks that are in place
+                            foreach (HookAttribute Hook in sharedMethod.Hooks)
+                            {
+                                Hook.PreExecuteMethod(OpSocket, sharedMethod, ref UsedArguments);
+                            }
+
+                            result.ReturnValue = sharedMethod.CallCache(sClass.InitializedClass, UsedArguments);
 
                             /*MethodInfo methodInf = sClass.InitializedClass.GetType().GetMethod(sharedMethod.Name, sharedMethod.ArgumentTypes);
                             result.ReturnValue = methodInf.Invoke(sClass.InitializedClass, args.ToArray());*/
@@ -174,9 +184,19 @@ namespace LiteCode.Messages
                 }
             }
 
+            int TrafficUsed = 0;
             if (RequireResultBack)
             {
-                Client.Send(new MsgExecuteMethodResponse(RequestId, result));
+                TrafficUsed = Client.Send(new MsgExecuteMethodResponse(RequestId, result));
+            }
+
+            if (sharedMethod != null && sharedMethod.Hooks != null)
+            {
+                //post-call the hooks that are in place
+                foreach (HookAttribute Hook in sharedMethod.Hooks)
+                {
+                    Hook.PostExecuteMethod(OpSocket, sharedMethod, UsedArguments, result.ReturnValue, TrafficUsed);
+                }
             }
         }
     }

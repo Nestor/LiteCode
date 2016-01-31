@@ -25,7 +25,7 @@ namespace SampleClient
                 int TimesCalled = 0;
                 int TimesCalledPerSec = 0;
 
-                while (false)
+                while (true)
                 {
                     //Console.ReadLine();
                     client.SharedTest.CallTest(1234);
