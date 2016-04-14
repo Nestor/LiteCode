@@ -51,6 +51,10 @@ namespace LiteCode.Messages
             {
                 if (!Client.SharedClasses.TryGetValue(ClassName, out localSharedClass))
                 {
+                    result.ExceptionOccured = true;
+                    result.exceptionMessage = "Shared Class not found";
+                    result.ReturnValue = null;
+                    Client.Send(new MsgGetSharedClassResponse(RequestId, result));
                     return;
                 }
             }
