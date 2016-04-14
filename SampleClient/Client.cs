@@ -38,7 +38,7 @@ namespace SampleClient
 
             //SharedTest.CallTest();
             //SharedTest.CallTest(1234);
-            //SharedTest.CallTest("test");
+            SharedTest.CallTest("test");
             //SharedTest.CallTest(ulong.MaxValue);
 
             //Console.WriteLine("ByteArrayTest");
@@ -46,7 +46,7 @@ namespace SampleClient
 
             //Console.WriteLine("CallTest");
             //SharedTest.CallTest();
-            SharedTest.DelegateTest(new DelegateTestCallback(CallbackDelegate));
+            //SharedTest.DelegateTest(new DelegateTestCallback(CallbackDelegate));
 
             //Console.WriteLine("IntegerTest");
             //int ret_Int = SharedTest.IntegerTest();
@@ -154,6 +154,11 @@ namespace SampleClient
             public override SecureSocketProtocol3.Security.Serialization.ISerialization DefaultSerializer
             {
                 get { return new ProtobufSerialization(); }
+            }
+
+            public override Stream[] KeyFiles
+            {
+                get { return new MemoryStream[0]; }
             }
         }
 
