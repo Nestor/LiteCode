@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\HookAttribute.cs" />
+    <Compile Include="Attributes\MultiThreadAttribute.cs" />
     <Compile Include="Attributes\NoExceptionAttribute.cs" />
     <Compile Include="Attributes\PacketQueueAttribute.cs" />
     <Compile Include="Attributes\RemoteConstructorAttribute.cs" />

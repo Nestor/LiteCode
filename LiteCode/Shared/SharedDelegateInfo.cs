@@ -12,5 +12,6 @@ namespace LiteCode.Shared
         public bool UseUDP;
         public bool UsePacketQueue;
         public bool NoWaitingTime;
+        public bool MultiThreaded;
     }
 }

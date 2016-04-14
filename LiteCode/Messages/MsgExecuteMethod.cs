@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Text;
 using SecureSocketProtocol3.Security.Serialization;
 using System.IO;
+using System.Threading;
 
 namespace LiteCode.Messages
 {
@@ -41,6 +42,8 @@ namespace LiteCode.Messages
         public int DelegateClassId { get; set; }
 
         bool isDelegate { get { return DelegateId > 0; } }
+        private SharedMethod sharedMethod = null;
+        private object[] UsedArguments = null;
 
         public MsgExecuteMethod()
             : base()
@@ -70,9 +73,7 @@ namespace LiteCode.Messages
         {
             ReturnResult result = new ReturnResult(null, false);
             LiteCodeClient Client = OpSocket as LiteCodeClient;
-            SharedMethod sharedMethod = null;
-            object[] UsedArguments = null;
-
+            
             try
             {
                 PayloadReader pr = new PayloadReader(Data);
@@ -161,7 +162,27 @@ namespace LiteCode.Messages
                                 Hook.PreExecuteMethod(OpSocket, sharedMethod, ref UsedArguments);
                             }
 
-                            result.ReturnValue = sharedMethod.CallCache(sClass.InitializedClass, UsedArguments);
+                            if (sharedMethod.MultiThreaded)
+                            {
+                                Thread TempThread = new Thread(new ThreadStart(() =>
+                                {
+                                    try
+                                    {
+                                        result.ReturnValue = sharedMethod.CallCache(sClass.InitializedClass, UsedArguments);
+                                        EndMethod(Client, OpSocket, result);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        ExceptionOccured(ex, result, client);
+                                        try { EndMethod(Client, OpSocket, result); } catch { }
+                                    }
+                                }));
+                                TempThread.Start();
+                            }
+                            else
+                            {
+                                result.ReturnValue = sharedMethod.CallCache(sClass.InitializedClass, UsedArguments);
+                            }
 
                             /*MethodInfo methodInf = sClass.InitializedClass.GetType().GetMethod(sharedMethod.Name, sharedMethod.ArgumentTypes);
                             result.ReturnValue = methodInf.Invoke(sClass.InitializedClass, args.ToArray());*/
@@ -171,19 +192,32 @@ namespace LiteCode.Messages
             }
             catch (Exception ex)
             {
-                result.exceptionMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-                result.ExceptionOccured = true;
-                client.onException(ex.InnerException != null ? ex.InnerException : ex, ErrorType.UserLand);
-
-                if (sharedMethod != null && sharedMethod.NoExceptions)
-                {
-                    result.exceptionMessage = null;
-                    result.ExceptionOccured = false;
-                    result.ReturnValue = null;
-                    result.UseTimeoutValue = true;
-                }
+                ExceptionOccured(ex, result, client);
             }
 
+            if (!sharedMethod.MultiThreaded)
+            {
+                EndMethod(Client, OpSocket, result);
+            }
+        }
+
+        private void ExceptionOccured(Exception ex, ReturnResult result, SSPClient client)
+        {
+            result.exceptionMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+            result.ExceptionOccured = true;
+            client.onException(ex.InnerException != null ? ex.InnerException : ex, ErrorType.UserLand);
+
+            if (sharedMethod != null && sharedMethod.NoExceptions)
+            {
+                result.exceptionMessage = null;
+                result.ExceptionOccured = false;
+                result.ReturnValue = null;
+                result.UseTimeoutValue = true;
+            }
+        }
+
+        private void EndMethod(LiteCodeClient Client, OperationalSocket OpSocket, ReturnResult result)
+        {
             int TrafficUsed = 0;
             if (RequireResultBack)
             {

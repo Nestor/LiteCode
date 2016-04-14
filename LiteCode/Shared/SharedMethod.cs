@@ -30,6 +30,7 @@ namespace LiteCode.Shared
         public bool usePacketQueue { get; private set; }
         public bool useUdp { get; private set; }
         public bool NoExceptions { get; private set; }
+        public bool MultiThreaded { get; private set; }
 
         public uint TimeOutLength { get; private set; }
         public object TimeOutValue { get; private set; }
@@ -61,7 +62,8 @@ namespace LiteCode.Shared
                         {
                             isUnchecked = (parameters[i].GetCustomAttributes(typeof(UncheckedRemoteExecutionAttribute), false).Length > 0),
                             UsePacketQueue = (parameters[i].GetCustomAttributes(typeof(PacketQueueAttribute), false).Length > 0),
-                            UseUDP = (parameters[i].GetCustomAttributes(typeof(UdpMethodAttribute), false).Length > 0)
+                            UseUDP = (parameters[i].GetCustomAttributes(typeof(UdpMethodAttribute), false).Length > 0),
+                            MultiThreaded = (parameters[i].GetCustomAttributes(typeof(MultiThreadAttribute), false).Length > 0)
                         });
                     }
                 }
@@ -73,6 +75,7 @@ namespace LiteCode.Shared
             this.usePacketQueue = (info.GetCustomAttributes(typeof(PacketQueueAttribute), false).Length > 0);
             this.useUdp = (info.GetCustomAttributes(typeof(UdpMethodAttribute), false).Length > 0);
             this.NoExceptions = (info.GetCustomAttributes(typeof(NoExceptionAttribute), false).Length > 0);
+            this.MultiThreaded = (info.GetCustomAttributes(typeof(MultiThreadAttribute), false).Length > 0);
 
             object[] tempAttr = info.GetCustomAttributes(typeof(RemoteExecutionAttribute), false);
             if (tempAttr.Length > 0)
@@ -167,7 +170,7 @@ namespace LiteCode.Shared
                 else
                 {
                     SyncObject syncObject = null;
-                    Random rnd = new Random();
+                    SecureRandom rnd = new SecureRandom();
                     int RequestId = rnd.Next();
                     lock (SharedClass.Client.Requests)
                     {

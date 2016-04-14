@@ -38,6 +38,7 @@ namespace SampleServer
         }
 
         [DebugHook]
+        [MultiThread]
         [RemoteExecution(30000, null)]
         public void CallTest(string test)
         {
