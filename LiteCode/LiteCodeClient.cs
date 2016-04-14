@@ -35,7 +35,16 @@ namespace LiteCode
         public LiteCodeClient(SSPClient client)
             : base(client)
         {
+            Requests = new SortedList<decimal, SyncObject>();
+            SharedClasses = new SortedList<string, SharedClass>();
+            InitializedClasses = new SortedList<int, SharedClass>();
 
+            base.Headers.RegisterHeader(typeof(NotUsedHeader));
+            base.MessageHandler.AddMessage(typeof(MsgDisposeClass), "DISPOSE_CLASS");
+            base.MessageHandler.AddMessage(typeof(MsgExecuteMethod), "EXECUTE_METHOD");
+            base.MessageHandler.AddMessage(typeof(MsgExecuteMethodResponse), "EXECUTE_METHOD_RESPONSE");
+            base.MessageHandler.AddMessage(typeof(MsgGetSharedClass), "GET_SHARED_CLASS");
+            base.MessageHandler.AddMessage(typeof(MsgGetSharedClassResponse), "GET_SHARED_CLASS_RESPONSE");
         }
 
         public override string Name
@@ -50,16 +59,6 @@ namespace LiteCode
 
         public override void onBeforeConnect()
         {
-            Requests = new SortedList<decimal, SyncObject>();
-            SharedClasses = new SortedList<string, SharedClass>();
-            InitializedClasses = new SortedList<int, SharedClass>();
-
-            base.Headers.RegisterHeader(typeof(NotUsedHeader));
-            base.MessageHandler.AddMessage(typeof(MsgDisposeClass), "DISPOSE_CLASS");
-            base.MessageHandler.AddMessage(typeof(MsgExecuteMethod), "EXECUTE_METHOD");
-            base.MessageHandler.AddMessage(typeof(MsgExecuteMethodResponse), "EXECUTE_METHOD_RESPONSE");
-            base.MessageHandler.AddMessage(typeof(MsgGetSharedClass), "GET_SHARED_CLASS");
-            base.MessageHandler.AddMessage(typeof(MsgGetSharedClassResponse), "GET_SHARED_CLASS_RESPONSE");
         }
 
         public override void onConnect()
@@ -86,7 +85,7 @@ namespace LiteCode
         {
             return base.Client.GetNextRandomInteger();
         }
-
+        
         public int Send(IMessage message)
         {
             return base.SendMessage(message, new NotUsedHeader());
